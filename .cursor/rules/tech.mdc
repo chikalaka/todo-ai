@@ -1,0 +1,14 @@
+---
+description: Some of the technology stack that is used in this project
+globs:
+alwaysApply: true
+---
+
+## Tech Stack
+
+- Next.js
+- Tailwind
+- React Query
+- Shadcn
+- @ai-sdk
+- Typescript
