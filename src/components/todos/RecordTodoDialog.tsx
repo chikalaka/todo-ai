@@ -25,6 +25,7 @@ interface ProcessedTodo {
   priority: number
   due_date?: string
   tags?: string[]
+  transcription_segment: string
 }
 
 type ProcessingState = "idle" | "uploading" | "processing" | "success" | "error"
@@ -67,6 +68,12 @@ export function RecordTodoDialog({
         throw new Error(result.error || "Failed to process recording")
       }
 
+      // Log the full processing result for debugging
+      console.log("=== VOICE PROCESSING COMPLETE ===")
+      console.log("Full API response:", result)
+      console.log("Processing metadata:", result.processing_metadata)
+      console.log("=================================")
+
       // Process the result and create todos
       const todos = result.todos as ProcessedTodo[]
 
@@ -78,13 +85,24 @@ export function RecordTodoDialog({
       setProcessingState("success")
 
       // Create the todos in the database using the hook
-      const todosForCreation = todos.map((todo) => ({
-        title: todo.title,
-        description: todo.description || null,
-        priority: todo.priority,
-        due_date: todo.due_date || null,
-        status: "todo" as const,
-      }))
+      const todosForCreation = todos.map((todo) => {
+        // Combine description with transcription segment for better context
+        const enhancedDescription = todo.description
+          ? `${todo.description}\n\n📝 From recording: "${todo.transcription_segment}"`
+          : `📝 From recording: "${todo.transcription_segment}"`
+
+        console.log(
+          `Creating todo: "${todo.title}" with transcription: "${todo.transcription_segment}"`,
+        )
+
+        return {
+          title: todo.title,
+          description: enhancedDescription,
+          priority: todo.priority,
+          due_date: todo.due_date || null,
+          status: "todo" as const,
+        }
+      })
 
       createBulkTodos(todosForCreation)
 
@@ -167,7 +185,7 @@ export function RecordTodoDialog({
                   {processedTodos.map((todo, index) => (
                     <li
                       key={index}
-                      className="text-sm text-gray-700 bg-gray-50 p-2 rounded"
+                      className="text-sm text-gray-700 bg-gray-50 p-3 rounded"
                     >
                       <strong>{todo.title}</strong>
                       {todo.description && (
@@ -175,15 +193,26 @@ export function RecordTodoDialog({
                           {todo.description}
                         </p>
                       )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        Priority: {todo.priority}
-                        {todo.due_date &&
-                          ` • Due: ${new Date(
-                            todo.due_date,
-                          ).toLocaleDateString()}`}
-                        {todo.tags &&
-                          todo.tags.length > 0 &&
-                          ` • Tags: ${todo.tags.join(", ")}`}
+                      <div className="text-xs text-gray-500 mt-2 space-y-1">
+                        <div>
+                          Priority: {todo.priority}
+                          {todo.due_date &&
+                            ` • Due: ${new Date(
+                              todo.due_date,
+                            ).toLocaleDateString()}`}
+                          {todo.tags &&
+                            todo.tags.length > 0 &&
+                            ` • Tags: ${todo.tags.join(", ")}`}
+                        </div>
+                        <div className="bg-blue-50 p-2 rounded border-l-2 border-blue-200">
+                          <span className="text-blue-700 font-medium">
+                            🎤 Transcription:
+                          </span>
+                          <span className="text-blue-600 italic">
+                            {" "}
+                            &quot;{todo.transcription_segment}&quot;
+                          </span>
+                        </div>
                       </div>
                     </li>
                   ))}

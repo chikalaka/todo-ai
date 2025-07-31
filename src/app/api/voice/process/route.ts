@@ -30,6 +30,11 @@ const todoSchema = z.object({
         .array(z.string())
         .optional()
         .describe("Relevant tags based on content categories"),
+      transcription_segment: z
+        .string()
+        .describe(
+          "The specific part of the transcription that led to this todo",
+        ),
     }),
   ),
 })
@@ -105,21 +110,26 @@ RULES:
 6. Suggest relevant tags based on content categories (work, personal, urgent, shopping, etc.)
 7. If unclear, err on the side of creating more specific todos rather than fewer general ones
 8. Ignore filler words and focus on actionable items
+9. IMPORTANT: For transcription_segment, include the exact words from the transcription that led to this specific todo (including context words)
 
 EXAMPLES:
-- "I need to call the dentist tomorrow and book a meeting with Sarah next Friday"
-  → Two todos: one for dentist call (due tomorrow), one for booking meeting (due next Friday)
-- "Buy groceries - milk, bread, and eggs - and also pick up dry cleaning"  
-  → Two todos: grocery shopping with description, dry cleaning pickup
-- "Finish the quarterly report, review the budget, and send emails to the team"
-  → Three separate work todos
+- Input: "I need to call the dentist tomorrow and book a meeting with Sarah next Friday"
+  → Todo 1: transcription_segment: "call the dentist tomorrow"
+  → Todo 2: transcription_segment: "book a meeting with Sarah next Friday"
+
+- Input: "Buy groceries - milk, bread, and eggs - and also pick up dry cleaning"  
+  → Todo 1: transcription_segment: "Buy groceries - milk, bread, and eggs"
+  → Todo 2: transcription_segment: "pick up dry cleaning"
+
+- Input: "Create a LinkedIn post about the new product launch and make sure to include the key features and benefits"
+  → Todo 1: transcription_segment: "Create a LinkedIn post about the new product launch and make sure to include the key features and benefits"
 
 Current date for reference: ${new Date().toISOString().split("T")[0]}
 
 TRANSCRIPTION TO ANALYZE:
 "${transcribedText}"
 
-Extract todos in the specified JSON format:`,
+Extract todos in the specified JSON format. Make sure each transcription_segment contains the actual words from the input that justify the todo creation:`,
     })
 
     const extractedTodos = object.todos
@@ -134,11 +144,25 @@ Extract todos in the specified JSON format:`,
       )
     }
 
+    // Log the AI processing results for debugging
+    console.log("=== AI PROCESSING RESULTS ===")
+    console.log("Original transcription:", transcribedText)
+    console.log("Number of todos extracted:", extractedTodos.length)
+    console.log("Extracted todos:", JSON.stringify(extractedTodos, null, 2))
+    console.log("==============================")
+
     // Return the extracted todos
     return NextResponse.json({
       success: true,
       todos: extractedTodos,
-      transcription: transcribedText, // Include for debugging if needed
+      transcription: transcribedText,
+      processing_metadata: {
+        timestamp: new Date().toISOString(),
+        transcription_length: transcribedText.length,
+        todos_count: extractedTodos.length,
+        model_used: "gpt-4o-mini",
+        whisper_model: "whisper-1",
+      },
     })
   } catch (error) {
     console.error("Error processing voice recording:", error)
