@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Trash2, Edit3, Check, X } from "lucide-react"
+import { Trash2, Edit3, Check, X, Edit2, Pencil } from "lucide-react"
 
 interface ProcessedTodo {
   title: string
@@ -38,7 +38,13 @@ export function EditableTodoCard({
   onDelete,
 }: EditableTodoCardProps) {
   const [isEditing, setIsEditing] = useState(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editedTodo, setEditedTodo] = useState<ProcessedTodo>(todo)
+  const [editedTitle, setEditedTitle] = useState(todo.title)
+  const [editedDescription, setEditedDescription] = useState(
+    todo.description || "",
+  )
 
   const handleSave = () => {
     onUpdate(index, editedTodo)
@@ -48,6 +54,28 @@ export function EditableTodoCard({
   const handleCancel = () => {
     setEditedTodo(todo)
     setIsEditing(false)
+  }
+
+  const handleTitleSave = () => {
+    const updatedTodo = { ...todo, title: editedTitle }
+    onUpdate(index, updatedTodo)
+    setIsEditingTitle(false)
+  }
+
+  const handleTitleCancel = () => {
+    setEditedTitle(todo.title)
+    setIsEditingTitle(false)
+  }
+
+  const handleDescriptionSave = () => {
+    const updatedTodo = { ...todo, description: editedDescription }
+    onUpdate(index, updatedTodo)
+    setIsEditingDescription(false)
+  }
+
+  const handleDescriptionCancel = () => {
+    setEditedDescription(todo.description || "")
+    setIsEditingDescription(false)
   }
 
   const formatDate = (dateString?: string) => {
@@ -261,9 +289,47 @@ export function EditableTodoCard({
     <Card className="border-gray-200 hover:border-gray-300 transition-colors">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <h3 className="font-medium text-gray-900 flex-1 pr-2">
-            {todo.title}
-          </h3>
+          <div className="flex items-center gap-2 flex-1 pr-2">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2 flex-1">
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="text-sm flex-1"
+                  autoFocus
+                />
+                <Button
+                  onClick={handleTitleSave}
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+                <Button
+                  onClick={handleTitleCancel}
+                  variant="outline"
+                  size="sm"
+                  className="h-7 w-7 p-0"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 flex-1">
+                <h3 className="font-medium text-gray-900 flex-1">
+                  {todo.title}
+                </h3>
+                <Button
+                  onClick={() => setIsEditingTitle(true)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                >
+                  <Edit2 className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             {/* Priority Display */}
             <div
@@ -283,31 +349,80 @@ export function EditableTodoCard({
               {getStatusDisplay(todo.status)}
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-1">
-              <Button
-                onClick={() => setIsEditing(true)}
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0"
-              >
-                <Edit3 className="h-3 w-3" />
-              </Button>
-              <Button
-                onClick={() => onDelete(index)}
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
-            </div>
+            {/* Delete Button */}
+            <Button
+              onClick={() => onDelete(index)}
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {todo.description && (
-          <p className="text-sm text-gray-600">{todo.description}</p>
+        {(todo.description || isEditingDescription) && (
+          <div className="space-y-2">
+            {isEditingDescription ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  placeholder="Add description..."
+                  className="text-sm min-h-[60px]"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleDescriptionSave}
+                    size="sm"
+                    className="h-7 px-3"
+                  >
+                    <Check className="h-3 w-3 mr-1" />
+                    Save
+                  </Button>
+                  <Button
+                    onClick={handleDescriptionCancel}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-3"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2">
+                <p className="text-sm text-gray-600 flex-1">
+                  {todo.description || "No description"}
+                </p>
+                <Button
+                  onClick={() => setIsEditingDescription(true)}
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0 opacity-50 hover:opacity-100 flex-shrink-0"
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!todo.description && !isEditingDescription && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400 italic">No description</span>
+            <Button
+              onClick={() => setIsEditingDescription(true)}
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+            >
+              <Pencil className="h-3 w-3" />
+            </Button>
+          </div>
         )}
 
         <div className="flex flex-wrap gap-2 text-xs text-gray-500">

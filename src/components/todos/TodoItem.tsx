@@ -31,6 +31,8 @@ import {
   Check,
   X,
   CalendarX,
+  Edit2,
+  Pencil,
 } from "lucide-react"
 import { useTodos } from "@/lib/hooks/useTodos"
 import { TagInput } from "./TagInput"
@@ -54,12 +56,18 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
   } = useTodos(showArchived)
   const [showTagInput, setShowTagInput] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [isEditingTitle, setIsEditingTitle] = useState(false)
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [editData, setEditData] = useState({
     title: todo.title,
     description: todo.description || "",
     priority: todo.priority,
     due_date: todo.due_date || "",
   })
+  const [editedTitle, setEditedTitle] = useState(todo.title)
+  const [editedDescription, setEditedDescription] = useState(
+    todo.description || "",
+  )
 
   const handleStatusChange = (newStatus: "todo" | "in_progress" | "done") => {
     updateTodo({
@@ -100,6 +108,32 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
 
   const handleClearDueDate = () => {
     setEditData({ ...editData, due_date: "" })
+  }
+
+  const handleTitleSave = () => {
+    updateTodo({
+      id: todo.id,
+      updates: { title: editedTitle },
+    })
+    setIsEditingTitle(false)
+  }
+
+  const handleTitleCancel = () => {
+    setEditedTitle(todo.title)
+    setIsEditingTitle(false)
+  }
+
+  const handleDescriptionSave = () => {
+    updateTodo({
+      id: todo.id,
+      updates: { description: editedDescription || null },
+    })
+    setIsEditingDescription(false)
+  }
+
+  const handleDescriptionCancel = () => {
+    setEditedDescription(todo.description || "")
+    setIsEditingDescription(false)
   }
 
   const formatDate = (dateString: string | null) => {
@@ -170,14 +204,60 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
               {/* Left side - Title */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 {/* Title */}
-                <h3
-                  className={`font-medium text-left truncate ${
-                    todo.status === "done" ? "line-through text-gray-500" : ""
-                  } ${showArchived ? "text-gray-600" : "text-gray-900"}`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {todo.title}
-                </h3>
+                {isEditingTitle ? (
+                  <div
+                    className="flex items-center gap-2 flex-1 min-w-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Input
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="text-sm flex-1"
+                      autoFocus
+                    />
+                    <Button
+                      onClick={handleTitleSave}
+                      size="sm"
+                      className="h-7 w-7 p-0 flex-shrink-0"
+                    >
+                      <Check className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      onClick={handleTitleCancel}
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0 flex-shrink-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <h3
+                      className={`font-medium text-left truncate ${
+                        todo.status === "done"
+                          ? "line-through text-gray-500"
+                          : ""
+                      } ${showArchived ? "text-gray-600" : "text-gray-900"}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {todo.title}
+                    </h3>
+                    {!showArchived && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setIsEditingTitle(true)
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 opacity-50 hover:opacity-100 flex-shrink-0"
+                      >
+                        <Edit2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                )}
 
                 {showArchived && (
                   <Badge variant="secondary" className="text-xs flex-shrink-0">
@@ -269,20 +349,6 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-1">
-                  {!showArchived && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setIsEditing(!isEditing)
-                      }}
-                      className="h-8 px-2"
-                    >
-                      <Edit3 className="h-3 w-3" />
-                    </Button>
-                  )}
-
                   {showArchived ? (
                     <>
                       <Button
@@ -465,19 +531,87 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
               ) : (
                 <>
                   {/* Description */}
-                  {todo.description && (
+                  {(todo.description || isEditingDescription) && (
                     <div className="space-y-1">
                       <label className="text-sm font-medium text-gray-700">
                         Description
                       </label>
-                      <TodoDescription
-                        description={todo.description}
-                        className={`text-sm text-gray-600 ${
-                          todo.status === "done" ? "line-through" : ""
-                        }`}
-                      />
+                      {isEditingDescription ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editedDescription}
+                            onChange={(e) =>
+                              setEditedDescription(e.target.value)
+                            }
+                            placeholder="Add description..."
+                            className="text-sm min-h-[80px]"
+                            autoFocus
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              onClick={handleDescriptionSave}
+                              size="sm"
+                              className="h-7 px-3"
+                            >
+                              <Check className="h-3 w-3 mr-1" />
+                              Save
+                            </Button>
+                            <Button
+                              onClick={handleDescriptionCancel}
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-3"
+                            >
+                              <X className="h-3 w-3 mr-1" />
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-start gap-2">
+                          <TodoDescription
+                            description={todo.description || "No description"}
+                            className={`text-sm text-gray-600 flex-1 ${
+                              todo.status === "done" ? "line-through" : ""
+                            }`}
+                          />
+                          {!showArchived && (
+                            <Button
+                              onClick={() => setIsEditingDescription(true)}
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 opacity-50 hover:opacity-100 flex-shrink-0"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
+
+                  {!todo.description &&
+                    !isEditingDescription &&
+                    !showArchived && (
+                      <div className="space-y-1">
+                        <label className="text-sm font-medium text-gray-700">
+                          Description
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-400 italic">
+                            No description
+                          </span>
+                          <Button
+                            onClick={() => setIsEditingDescription(true)}
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
 
                   {/* Dates */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
