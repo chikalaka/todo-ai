@@ -103,131 +103,143 @@ export function TodoList({ showArchived = false }: TodoListProps) {
     searchTerm
 
   return (
-    <div className="space-y-6">
-      {/* Filters Bar */}
-      <div className="bg-white p-6 rounded-lg border shadow-sm">
-        <div className="space-y-4">
-          {/* Main Filters Row */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search todos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+    <div className="space-y-4">
+      {/* Modern Filters Bar */}
+      <div className="space-y-4">
+        {/* Main Filters Row */}
+        <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+          {/* Search */}
+          <div className="flex-1 relative min-w-0">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search todos..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white/70 border-gray-200 focus:bg-white transition-colors"
+            />
+          </div>
 
+          {/* Filter Controls */}
+          <div className="flex flex-wrap gap-2 items-center">
             {/* Status Filter */}
-            <div className="w-full sm:w-40">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="todo">Todo</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="done">Done</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-32 bg-white/70 border-gray-200 focus:bg-white transition-colors">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="todo">Todo</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="done">Done</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Priority Filter */}
-            <div className="w-full sm:w-40">
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Priority</SelectItem>
-                  <SelectItem value="high">High (8-10)</SelectItem>
-                  <SelectItem value="medium">Medium (4-7)</SelectItem>
-                  <SelectItem value="low">Low (1-3)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-36 bg-white/70 border-gray-200 focus:bg-white transition-colors">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="high">High (8-10)</SelectItem>
+                <SelectItem value="medium">Medium (4-7)</SelectItem>
+                <SelectItem value="low">Low (1-3)</SelectItem>
+              </SelectContent>
+            </Select>
 
-            {/* Clear Filters */}
+            {/* Clear All Filters */}
             {hasActiveFilters && (
               <Button
-                variant="outline"
-                size="default"
+                variant="ghost"
+                size="sm"
                 onClick={clearAllFilters}
-                className="flex items-center gap-2 whitespace-nowrap"
+                className="flex items-center gap-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
               >
-                <X className="h-4 w-4" />
-                Clear All
+                <X className="h-3 w-3" />
+                Clear
               </Button>
             )}
           </div>
-
-          {/* Tag Filters */}
-          {tags.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700">
-                  Filter by Tags:
-                </label>
-                {selectedTagFilters.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearTagFilters}
-                    className="text-xs h-6 px-2 flex items-center gap-1"
-                  >
-                    <X className="h-3 w-3" />
-                    Clear Tags
-                  </Button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag: Tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant={
-                      selectedTagFilters.includes(tag.id)
-                        ? "default"
-                        : "outline"
-                    }
-                    className="cursor-pointer hover:bg-primary/80 transition-colors"
-                    onClick={() => handleTagFilterToggle(tag.id)}
-                  >
-                    {tag.name}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Results Summary */}
-          {hasActiveFilters && (
-            <div className="text-sm text-gray-600 pt-2 border-t">
-              Showing {filteredTodos.length} of {todos.length}{" "}
-              {showArchived ? "archived" : "active"} todos
-              {selectedTagFilters.length > 0 &&
-                ` with ${selectedTagFilters.length} tag filter(s)`}
-            </div>
-          )}
         </div>
+
+        {/* Tag Filters Section */}
+        {tags.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tags
+              </span>
+              <div className="h-px bg-gray-200 flex-1"></div>
+              {selectedTagFilters.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearTagFilters}
+                  className="text-xs h-6 px-2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag: Tag) => (
+                <Badge
+                  key={tag.id}
+                  variant={
+                    selectedTagFilters.includes(tag.id)
+                      ? "default"
+                      : "secondary"
+                  }
+                  className="cursor-pointer hover:scale-105 transition-all duration-150 text-xs py-1 px-2"
+                  onClick={() => handleTagFilterToggle(tag.id)}
+                >
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Results Summary */}
+        {hasActiveFilters && (
+          <div className="flex items-center gap-2 text-xs text-gray-500 py-2 border-t border-gray-100">
+            <div className="h-1 w-1 bg-blue-400 rounded-full"></div>
+            <span>
+              {filteredTodos.length} of {todos.length}{" "}
+              {showArchived ? "archived" : "active"} todos
+              {selectedTagFilters.length > 0 && (
+                <span className="ml-1">
+                  • {selectedTagFilters.length} tag
+                  {selectedTagFilters.length > 1 ? "s" : ""} selected
+                </span>
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Todo List */}
       <div className="space-y-3">
         {filteredTodos.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-gray-500">
-              {todos.length === 0
-                ? showArchived
-                  ? "No archived todos yet."
-                  : "No todos yet. Create your first todo!"
-                : "No todos match your filters."}
-            </CardContent>
-          </Card>
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-sm">
+              {hasActiveFilters
+                ? "No todos match your current filters"
+                : `No ${showArchived ? "archived" : "active"} todos found`}
+            </div>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="mt-2 text-xs"
+              >
+                Clear filters to see all todos
+              </Button>
+            )}
+          </div>
         ) : (
-          filteredTodos.map((todo) => (
+          filteredTodos.map((todo: TodoWithTags) => (
             <TodoItem key={todo.id} todo={todo} showArchived={showArchived} />
           ))
         )}
