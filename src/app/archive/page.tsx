@@ -38,15 +38,13 @@ export default function ArchivePage() {
       <main className="flex-1 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Archive</h1>
-            <p className="text-gray-600 mt-1">
-              View your completed and archived tasks
+            <h1 className="text-3xl font-bold text-gray-900">Archived Todos</h1>
+            <p className="text-gray-600 mt-2">
+              View and manage your completed and archived tasks
             </p>
           </div>
 
-          {/* For now, using the same TodoList component, but this could be enhanced 
-              to filter for completed/archived todos specifically */}
-          <TodoList />
+          <TodoList showArchived={true} />
         </div>
       </main>
     </AppLayout>

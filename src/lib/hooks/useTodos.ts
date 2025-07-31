@@ -89,6 +89,37 @@ export function useTodos(showArchived = false) {
     },
   })
 
+  // New bulk creation mutation
+  const createBulkTodosMutation = useMutation({
+    mutationFn: async (todos: Array<Omit<TodoInsert, "user_id">>) => {
+      if (!user) throw new Error("User not authenticated")
+
+      const todosWithUser = todos.map((todo) => ({
+        ...todo,
+        user_id: user.id,
+      }))
+
+      const { data, error } = await supabase
+        .from("todos")
+        .insert(todosWithUser)
+        .select()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] })
+      toast.success(
+        `${data.length} todo${
+          data.length > 1 ? "s" : ""
+        } created successfully!`,
+      )
+    },
+    onError: (error) => {
+      toast.error(`Failed to create todos: ${error.message}`)
+    },
+  })
+
   const updateTodoMutation = useMutation({
     mutationFn: async ({
       id,
@@ -136,12 +167,18 @@ export function useTodos(showArchived = false) {
 
   const archiveTodoMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("todos")
-        .update({ archived: true, updated_at: new Date().toISOString() })
+        .update({
+          archived: true,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id)
+        .select()
+        .single()
 
       if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] })
@@ -154,12 +191,18 @@ export function useTodos(showArchived = false) {
 
   const unarchiveTodoMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("todos")
-        .update({ archived: false, updated_at: new Date().toISOString() })
+        .update({
+          archived: false,
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", id)
+        .select()
+        .single()
 
       if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] })
@@ -175,14 +218,16 @@ export function useTodos(showArchived = false) {
     isLoading: todosQuery.isLoading,
     error: todosQuery.error,
     createTodo: createTodoMutation.mutate,
-    updateTodo: updateTodoMutation.mutate,
-    deleteTodo: deleteTodoMutation.mutate,
-    archiveTodo: archiveTodoMutation.mutate,
-    unarchiveTodo: unarchiveTodoMutation.mutate,
+    createBulkTodos: createBulkTodosMutation.mutate,
     isCreating: createTodoMutation.isPending,
+    isBulkCreating: createBulkTodosMutation.isPending,
+    updateTodo: updateTodoMutation.mutate,
     isUpdating: updateTodoMutation.isPending,
+    deleteTodo: deleteTodoMutation.mutate,
     isDeleting: deleteTodoMutation.isPending,
+    archiveTodo: archiveTodoMutation.mutate,
     isArchiving: archiveTodoMutation.isPending,
+    unarchiveTodo: unarchiveTodoMutation.mutate,
     isUnarchiving: unarchiveTodoMutation.isPending,
   }
 }

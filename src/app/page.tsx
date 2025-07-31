@@ -38,13 +38,13 @@ export default function HomePage() {
       <main className="flex-1 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Your Todos</h1>
-            <p className="text-gray-600 mt-1">
-              Manage your tasks and stay organized
+            <h1 className="text-3xl font-bold text-gray-900">Active Todos</h1>
+            <p className="text-gray-600 mt-2">
+              Manage your active tasks and stay organized
             </p>
           </div>
 
-          <TodoList />
+          <TodoList showArchived={false} />
         </div>
       </main>
     </AppLayout>
