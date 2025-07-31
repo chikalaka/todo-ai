@@ -49,13 +49,7 @@ export function AppSidebar() {
     <>
       <Sidebar collapsible="icon">
         <SidebarHeader className="border-b border-sidebar-border">
-          <div className="flex items-center justify-between px-2 py-4">
-            <div className="flex items-center gap-2">
-              <ListTodo className="h-6 w-6 flex-shrink-0" />
-              <span className="text-lg font-semibold truncate">Todo App</span>
-            </div>
-            <SidebarTrigger className="h-6 w-6 flex-shrink-0" />
-          </div>
+          <SidebarTrigger />
         </SidebarHeader>
 
         <SidebarContent>

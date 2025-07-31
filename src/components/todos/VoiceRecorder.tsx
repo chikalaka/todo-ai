@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Mic, MicOff, Play, Pause, Square, Trash2 } from "lucide-react"
+import React, { useState, useEffect } from "react"
+import { Mic, MicOff, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useVoiceRecording } from "@/hooks/useVoiceRecording"
 
@@ -17,12 +17,9 @@ export function VoiceRecorder({
   const {
     recordingState,
     audioBlob,
-    audioUrl,
     duration,
     startRecording,
     stopRecording,
-    pauseRecording,
-    resumeRecording,
     clearRecording,
     isSupported,
   } = useVoiceRecording()
@@ -69,11 +66,14 @@ export function VoiceRecorder({
     stopRecording()
   }
 
-  const handleUseRecording = () => {
-    if (audioBlob) {
+  // Process recording immediately when audioBlob becomes available
+  useEffect(() => {
+    if (audioBlob && recordingState === "stopped") {
       onRecordingComplete(audioBlob)
+      // Clear the recording after processing
+      clearRecording()
     }
-  }
+  }, [audioBlob, recordingState, onRecordingComplete, clearRecording])
 
   if (!isSupported) {
     return (
@@ -110,106 +110,28 @@ export function VoiceRecorder({
         )}
 
         {recordingState === "recording" && (
-          <>
-            <Button
-              onClick={pauseRecording}
-              disabled={disabled}
-              size="lg"
-              variant="outline"
-            >
-              <Pause className="h-5 w-5 mr-2" />
-              Pause
-            </Button>
-            <Button
-              onClick={handleStopRecording}
-              disabled={disabled}
-              size="lg"
-              className="bg-red-500 hover:bg-red-600"
-            >
-              <Square className="h-5 w-5 mr-2" />
-              Stop
-            </Button>
-          </>
-        )}
-
-        {recordingState === "paused" && (
-          <>
-            <Button
-              onClick={resumeRecording}
-              disabled={disabled}
-              size="lg"
-              className="bg-green-500 hover:bg-green-600"
-            >
-              <Mic className="h-5 w-5 mr-2" />
-              Resume
-            </Button>
-            <Button
-              onClick={handleStopRecording}
-              disabled={disabled}
-              size="lg"
-              className="bg-red-500 hover:bg-red-600"
-            >
-              <Square className="h-5 w-5 mr-2" />
-              Stop
-            </Button>
-          </>
+          <Button
+            onClick={handleStopRecording}
+            disabled={disabled}
+            size="lg"
+            className="bg-red-500 hover:bg-red-600"
+          >
+            <Square className="h-5 w-5 mr-2" />
+            Stop
+          </Button>
         )}
       </div>
 
       {/* Recording Status */}
-      {(recordingState === "recording" || recordingState === "paused") && (
+      {recordingState === "recording" && (
         <div className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
-            {recordingState === "recording" && (
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-            )}
-            {recordingState === "paused" && (
-              <div className="w-3 h-3 bg-yellow-500 rounded-full" />
-            )}
+            <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
             <span className="text-lg font-mono">
               {formatDuration(duration)}
             </span>
           </div>
-          <p className="text-sm text-gray-600">
-            {recordingState === "recording"
-              ? "Recording..."
-              : "Recording paused"}
-          </p>
-        </div>
-      )}
-
-      {/* Playback and Actions */}
-      {recordingState === "stopped" && audioUrl && (
-        <div className="space-y-3">
-          <div className="text-center">
-            <div className="text-lg font-mono mb-2">
-              {formatDuration(duration)}
-            </div>
-            <audio controls className="w-full max-w-md mx-auto">
-              <source src={audioUrl} type="audio/webm" />
-              <source src={audioUrl} type="audio/mp4" />
-              Your browser does not support the audio element.
-            </audio>
-          </div>
-
-          <div className="flex justify-center space-x-3">
-            <Button
-              onClick={handleUseRecording}
-              disabled={disabled}
-              className="bg-green-500 hover:bg-green-600"
-            >
-              <Play className="h-4 w-4 mr-2" />
-              Process Recording
-            </Button>
-            <Button
-              onClick={clearRecording}
-              disabled={disabled}
-              variant="outline"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          </div>
+          <p className="text-sm text-gray-600">Recording...</p>
         </div>
       )}
 
