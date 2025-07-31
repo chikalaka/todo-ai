@@ -18,6 +18,7 @@ interface ProcessedTodo {
   title: string
   description?: string
   priority: number
+  status?: "todo" | "in_progress" | "done"
   due_date?: string
   tags?: string[]
   transcription_segment: string
@@ -64,6 +65,44 @@ export function EditableTodoCard({
       return new Date(dateString).toLocaleDateString()
     } catch {
       return "Invalid date"
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "todo":
+        return "bg-gray-100 text-gray-800 border-gray-200"
+      case "in_progress":
+        return "bg-blue-100 text-blue-800 border-blue-200"
+      case "done":
+        return "bg-green-100 text-green-800 border-green-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
+    }
+  }
+
+  const getPriorityColor = (priority: number) => {
+    if (priority <= 3) return "bg-green-100 text-green-800 border-green-200"
+    if (priority <= 7) return "bg-yellow-100 text-yellow-800 border-yellow-200"
+    return "bg-red-100 text-red-800 border-red-200"
+  }
+
+  const getPriorityLabel = (priority: number) => {
+    if (priority <= 3) return "Low"
+    if (priority <= 7) return "Medium"
+    return "High"
+  }
+
+  const getStatusDisplay = (status?: string) => {
+    switch (status) {
+      case "todo":
+        return "Todo"
+      case "in_progress":
+        return "In Progress"
+      case "done":
+        return "Done"
+      default:
+        return "Todo"
     }
   }
 
@@ -121,7 +160,7 @@ export function EditableTodoCard({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="text-xs font-medium text-gray-700 mb-1 block">
                 Priority
@@ -132,15 +171,55 @@ export function EditableTodoCard({
                   setEditedTodo({ ...editedTodo, priority: parseInt(value) })
                 }
               >
-                <SelectTrigger className="text-sm">
+                <SelectTrigger
+                  className={`text-sm ${getPriorityColor(editedTodo.priority)}`}
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((p) => (
-                    <SelectItem key={p} value={p.toString()}>
-                      {p} {p <= 3 ? "(Low)" : p <= 6 ? "(Medium)" : "(High)"}
+                    <SelectItem
+                      key={p}
+                      value={p.toString()}
+                      className={getPriorityColor(p)}
+                    >
+                      P{p} - {getPriorityLabel(p)}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-gray-700 mb-1 block">
+                Status
+              </label>
+              <Select
+                value={editedTodo.status || "todo"}
+                onValueChange={(value: "todo" | "in_progress" | "done") =>
+                  setEditedTodo({ ...editedTodo, status: value })
+                }
+              >
+                <SelectTrigger
+                  className={`text-sm ${getStatusColor(
+                    editedTodo.status || "todo",
+                  )}`}
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todo" className={getStatusColor("todo")}>
+                    Todo
+                  </SelectItem>
+                  <SelectItem
+                    value="in_progress"
+                    className={getStatusColor("in_progress")}
+                  >
+                    In Progress
+                  </SelectItem>
+                  <SelectItem value="done" className={getStatusColor("done")}>
+                    Done
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -181,27 +260,48 @@ export function EditableTodoCard({
   return (
     <Card className="border-gray-200 hover:border-gray-300 transition-colors">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-between">
           <h3 className="font-medium text-gray-900 flex-1 pr-2">
             {todo.title}
           </h3>
-          <div className="flex gap-1">
-            <Button
-              onClick={() => setIsEditing(true)}
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0"
+          <div className="flex items-center gap-2">
+            {/* Priority Display */}
+            <div
+              className={`px-2 py-1 rounded text-xs ${getPriorityColor(
+                todo.priority,
+              )}`}
             >
-              <Edit3 className="h-3 w-3" />
-            </Button>
-            <Button
-              onClick={() => onDelete(index)}
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              P{todo.priority} - {getPriorityLabel(todo.priority)}
+            </div>
+
+            {/* Status Display */}
+            <div
+              className={`px-2 py-1 rounded text-xs ${getStatusColor(
+                todo.status || "todo",
+              )}`}
             >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+              {getStatusDisplay(todo.status)}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-1">
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+              >
+                <Edit3 className="h-3 w-3" />
+              </Button>
+              <Button
+                onClick={() => onDelete(index)}
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardHeader>
@@ -211,9 +311,6 @@ export function EditableTodoCard({
         )}
 
         <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-          <span className="bg-gray-100 px-2 py-1 rounded">
-            Priority: {todo.priority}
-          </span>
           {todo.due_date && (
             <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
               Due: {formatDateForDisplay(todo.due_date)}

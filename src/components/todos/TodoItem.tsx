@@ -68,6 +68,13 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
     })
   }
 
+  const handlePriorityChange = (newPriority: string) => {
+    updateTodo({
+      id: todo.id,
+      updates: { priority: parseInt(newPriority) },
+    })
+  }
+
   const handleSaveEdit = () => {
     updateTodo({
       id: todo.id,
@@ -123,6 +130,19 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
     }
   }
 
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case "todo":
+        return "Todo"
+      case "in_progress":
+        return "In Progress"
+      case "done":
+        return "Done"
+      default:
+        return "Todo"
+    }
+  }
+
   const getPriorityColor = (priority: number) => {
     if (priority <= 3) return "bg-green-100 text-green-800 border-green-200"
     if (priority <= 7) return "bg-yellow-100 text-yellow-800 border-yellow-200"
@@ -147,26 +167,8 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
         <AccordionItem value={todo.id} className="border-none">
           <AccordionTrigger className="px-4 py-3 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200">
             <div className="flex items-center justify-between w-full">
-              {/* Left side - Title and Status */}
+              {/* Left side - Title */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {/* Status Dropdown */}
-                <div className="flex-shrink-0">
-                  <Select
-                    value={todo.status}
-                    onValueChange={handleStatusChange}
-                    disabled={showArchived}
-                  >
-                    <SelectTrigger className="h-8 w-32 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todo">Todo</SelectItem>
-                      <SelectItem value="in_progress">In Progress</SelectItem>
-                      <SelectItem value="done">Done</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* Title */}
                 <h3
                   className={`font-medium text-left truncate ${
@@ -184,17 +186,86 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                 )}
               </div>
 
-              {/* Right side - Priority, Status Badge, and Actions */}
+              {/* Right side - Priority, Status Dropdowns, and Actions */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                {/* Priority Badge */}
-                <Badge className={`${getPriorityColor(todo.priority)} text-xs`}>
-                  {getPriorityLabel(todo.priority)} P{todo.priority}
-                </Badge>
+                {/* Priority Dropdown */}
+                {!showArchived && (
+                  <Select
+                    value={todo.priority.toString()}
+                    onValueChange={handlePriorityChange}
+                    disabled={showArchived}
+                  >
+                    <SelectTrigger
+                      className={`h-8 w-24 text-xs ${getPriorityColor(
+                        todo.priority,
+                      )}`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((priority) => (
+                        <SelectItem
+                          key={priority}
+                          value={priority.toString()}
+                          className={getPriorityColor(priority)}
+                        >
+                          P{priority} - {getPriorityLabel(priority)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
 
-                {/* Status Badge */}
-                <Badge className={`${getStatusColor(todo.status)} text-xs`}>
-                  {todo.status.replace("_", " ")}
-                </Badge>
+                {/* Status Dropdown */}
+                {!showArchived && (
+                  <Select
+                    value={todo.status}
+                    onValueChange={handleStatusChange}
+                    disabled={showArchived}
+                  >
+                    <SelectTrigger
+                      className={`h-8 w-28 text-xs ${getStatusColor(
+                        todo.status,
+                      )}`}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        value="todo"
+                        className={getStatusColor("todo")}
+                      >
+                        Todo
+                      </SelectItem>
+                      <SelectItem
+                        value="in_progress"
+                        className={getStatusColor("in_progress")}
+                      >
+                        In Progress
+                      </SelectItem>
+                      <SelectItem
+                        value="done"
+                        className={getStatusColor("done")}
+                      >
+                        Done
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {/* Show badges for archived items */}
+                {showArchived && (
+                  <>
+                    <Badge
+                      className={`${getPriorityColor(todo.priority)} text-xs`}
+                    >
+                      P{todo.priority} - {getPriorityLabel(todo.priority)}
+                    </Badge>
+                    <Badge className={`${getStatusColor(todo.status)} text-xs`}>
+                      {getStatusDisplay(todo.status)}
+                    </Badge>
+                  </>
+                )}
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-1">
