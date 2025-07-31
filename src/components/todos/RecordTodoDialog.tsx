@@ -9,9 +9,16 @@ import {
 } from "@/components/ui/dialog"
 import { VoiceRecorder } from "./VoiceRecorder"
 import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle, XCircle } from "lucide-react"
+import {
+  Loader2,
+  CheckCircle,
+  XCircle,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react"
 import { toast } from "sonner"
 import { useTodos } from "@/lib/hooks/useTodos"
+import { EditableTodoCard } from "./EditableTodoCard"
 
 interface RecordTodoDialogProps {
   open: boolean
@@ -28,7 +35,14 @@ interface ProcessedTodo {
   transcription_segment: string
 }
 
-type ProcessingState = "idle" | "uploading" | "processing" | "success" | "error"
+type ProcessingState =
+  | "idle"
+  | "uploading"
+  | "processing"
+  | "review"
+  | "creating"
+  | "success"
+  | "error"
 
 export function RecordTodoDialog({
   open,
@@ -82,10 +96,38 @@ export function RecordTodoDialog({
       }
 
       setProcessedTodos(todos)
-      setProcessingState("success")
+      setProcessingState("review")
+    } catch (err) {
+      console.error("Error processing recording:", err)
+      setError(
+        err instanceof Error ? err.message : "Failed to process recording",
+      )
+      setProcessingState("error")
+    }
+  }
 
+  const updateTodo = (index: number, updatedTodo: ProcessedTodo) => {
+    const updated = [...processedTodos]
+    updated[index] = updatedTodo
+    setProcessedTodos(updated)
+  }
+
+  const deleteTodo = (index: number) => {
+    const updated = processedTodos.filter((_, i) => i !== index)
+    setProcessedTodos(updated)
+  }
+
+  const handleApprove = async () => {
+    if (processedTodos.length === 0) {
+      toast.error("No todos to create")
+      return
+    }
+
+    setProcessingState("creating")
+
+    try {
       // Create the todos in the database using the hook
-      const todosForCreation = todos.map((todo) => {
+      const todosForCreation = processedTodos.map((todo) => {
         // Combine description with transcription segment for better context
         const enhancedDescription = todo.description
           ? `${todo.description}\n\n📝 From recording: "${todo.transcription_segment}"`
@@ -106,9 +148,11 @@ export function RecordTodoDialog({
 
       createBulkTodos(todosForCreation)
 
+      setProcessingState("success")
+
       toast.success(
-        `Successfully created ${todos.length} todo${
-          todos.length > 1 ? "s" : ""
+        `Successfully created ${processedTodos.length} todo${
+          processedTodos.length > 1 ? "s" : ""
         }!`,
       )
       onTodosCreated?.()
@@ -119,12 +163,16 @@ export function RecordTodoDialog({
         handleClose()
       }, 2000)
     } catch (err) {
-      console.error("Error processing recording:", err)
-      setError(
-        err instanceof Error ? err.message : "Failed to process recording",
-      )
+      console.error("Error creating todos:", err)
+      setError(err instanceof Error ? err.message : "Failed to create todos")
       setProcessingState("error")
     }
+  }
+
+  const handleReject = () => {
+    setProcessingState("idle")
+    setProcessedTodos([])
+    setError(null)
   }
 
   const handleClose = () => {
@@ -142,12 +190,12 @@ export function RecordTodoDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Record Todo</DialogTitle>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="mt-4 flex-1 overflow-hidden">
           {processingState === "idle" && (
             <VoiceRecorder onRecordingComplete={handleRecordingComplete} />
           )}
@@ -172,6 +220,76 @@ export function RecordTodoDialog({
             </div>
           )}
 
+          {processingState === "review" && (
+            <div className="py-4">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Review Suggested Todos
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Edit, delete, or approve the todos extracted from your
+                  recording
+                </p>
+              </div>
+
+              {processedTodos.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600">No todos remaining</p>
+                  <Button
+                    onClick={handleReject}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    Start Over
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <div className="space-y-4 max-h-96 overflow-y-auto">
+                    {processedTodos.map((todo, index) => (
+                      <EditableTodoCard
+                        key={index}
+                        todo={todo}
+                        index={index}
+                        onUpdate={updateTodo}
+                        onDelete={deleteTodo}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between mt-6 pt-4 border-t">
+                    <Button
+                      onClick={handleReject}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <ThumbsDown className="h-4 w-4" />
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleApprove}
+                      className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                      Create {processedTodos.length} Todo
+                      {processedTodos.length > 1 ? "s" : ""}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {processingState === "creating" && (
+            <div className="text-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-lg font-medium">Creating todos...</p>
+              <p className="text-sm text-gray-600">
+                Please wait while we add your todos
+              </p>
+            </div>
+          )}
+
           {processingState === "success" && (
             <div className="text-center py-8">
               <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
@@ -179,45 +297,6 @@ export function RecordTodoDialog({
                 Successfully created {processedTodos.length} todo
                 {processedTodos.length > 1 ? "s" : ""}!
               </p>
-              <div className="mt-4 text-left">
-                <p className="text-sm font-medium mb-2">Created todos:</p>
-                <ul className="space-y-1">
-                  {processedTodos.map((todo, index) => (
-                    <li
-                      key={index}
-                      className="text-sm text-gray-700 bg-gray-50 p-3 rounded"
-                    >
-                      <strong>{todo.title}</strong>
-                      {todo.description && (
-                        <p className="text-xs text-gray-600 mt-1">
-                          {todo.description}
-                        </p>
-                      )}
-                      <div className="text-xs text-gray-500 mt-2 space-y-1">
-                        <div>
-                          Priority: {todo.priority}
-                          {todo.due_date &&
-                            ` • Due: ${new Date(
-                              todo.due_date,
-                            ).toLocaleDateString()}`}
-                          {todo.tags &&
-                            todo.tags.length > 0 &&
-                            ` • Tags: ${todo.tags.join(", ")}`}
-                        </div>
-                        <div className="bg-blue-50 p-2 rounded border-l-2 border-blue-200">
-                          <span className="text-blue-700 font-medium">
-                            🎤 Transcription:
-                          </span>
-                          <span className="text-blue-600 italic">
-                            {" "}
-                            &quot;{todo.transcription_segment}&quot;
-                          </span>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           )}
 

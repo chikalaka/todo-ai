@@ -34,6 +34,7 @@ import {
 } from "lucide-react"
 import { useTodos } from "@/lib/hooks/useTodos"
 import { TagInput } from "./TagInput"
+import { TodoDescription } from "./TodoDescription"
 import { TodoWithTags } from "@/lib/types/database.types"
 
 interface TodoItemProps {
@@ -398,13 +399,12 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                       <label className="text-sm font-medium text-gray-700">
                         Description
                       </label>
-                      <p
+                      <TodoDescription
+                        description={todo.description}
                         className={`text-sm text-gray-600 ${
                           todo.status === "done" ? "line-through" : ""
                         }`}
-                      >
-                        {todo.description}
-                      </p>
+                      />
                     </div>
                   )}
 
