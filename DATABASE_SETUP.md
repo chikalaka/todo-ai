@@ -75,16 +75,31 @@ CREATE INDEX idx_tags_user_id ON tags(user_id);
 1. In your Supabase dashboard, go to Authentication > Providers
 2. Enable Google provider
 3. Add your Google OAuth credentials
-4. Set the redirect URL to: `http://localhost:3000/auth/callback`
+4. **Configure Redirect URLs** (IMPORTANT for production):
+   - For **local development**: `http://localhost:3000/auth/callback`
+   - For **production**: `https://yourdomain.com/auth/callback`
+   - You can add multiple redirect URLs separated by commas
+   - Example: `http://localhost:3000/auth/callback,https://yourdomain.com/auth/callback`
 
 ## 4. Update Environment Variables
 
-Update your `.env.local` file with your actual Supabase credentials:
+### For Local Development (.env.local):
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_actual_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_anon_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
+
+### For Production Deployment:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_actual_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_anon_key
+NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+```
+
+**Important**: Replace `yourdomain.com` with your actual production domain.
 
 ### About Supabase Keys:
 

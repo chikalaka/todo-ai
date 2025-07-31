@@ -3,7 +3,16 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ListTodo, Archive, Plus, LogOut, User, Menu, Mic } from "lucide-react"
+import {
+  ListTodo,
+  Archive,
+  Plus,
+  LogOut,
+  User,
+  Menu,
+  Mic,
+  Tags,
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +45,11 @@ const navigationItems = [
     title: "Archived Todos",
     url: "/archive",
     icon: Archive,
+  },
+  {
+    title: "Manage Tags",
+    url: "/tags",
+    icon: Tags,
   },
 ]
 

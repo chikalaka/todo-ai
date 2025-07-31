@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { createClient } from "@/lib/supabase/client"
-import { Tag, TagInsert } from "@/lib/types/database.types"
+import { Tag, TagInsert, TagUpdate } from "@/lib/types/database.types"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { toast } from "sonner"
 
@@ -50,6 +50,33 @@ export function useTags() {
     },
     onError: (error) => {
       toast.error(`Failed to create tag: ${error.message}`)
+    },
+  })
+
+  const updateTagMutation = useMutation({
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string
+      updates: Omit<TagUpdate, "id">
+    }) => {
+      const { data, error } = await supabase
+        .from("tags")
+        .update(updates)
+        .eq("id", id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags"] })
+      toast.success("Tag updated successfully!")
+    },
+    onError: (error) => {
+      toast.error(`Failed to update tag: ${error.message}`)
     },
   })
 
@@ -121,10 +148,12 @@ export function useTags() {
     isLoading: tagsQuery.isLoading,
     error: tagsQuery.error,
     createTag: createTagMutation.mutate,
+    updateTag: updateTagMutation.mutate,
     deleteTag: deleteTagMutation.mutate,
     addTagToTodo: addTagToTodoMutation.mutate,
     removeTagFromTodo: removeTagFromTodoMutation.mutate,
     isCreating: createTagMutation.isPending,
+    isUpdating: updateTagMutation.isPending,
     isDeleting: deleteTagMutation.isPending,
   }
 }
