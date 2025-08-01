@@ -201,13 +201,6 @@ Extract todos in the specified JSON format. Make sure each transcription_segment
       )
     }
 
-    // Log the AI processing results for debugging
-    console.log("=== AI PROCESSING RESULTS ===")
-    console.log("Original transcription:", transcribedText)
-    console.log("Number of todos extracted:", extractedTodos.length)
-    console.log("Extracted todos:", JSON.stringify(extractedTodos, null, 2))
-    console.log("==============================")
-
     // Return the extracted todos
     return NextResponse.json({
       success: true,
