@@ -199,7 +199,10 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
     >
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value={todo.id} className="border-none">
-          <AccordionTrigger className="px-4 py-3 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200">
+          <AccordionTrigger
+            asChild
+            className="px-4 py-3 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200"
+          >
             <div className="flex items-center justify-between w-full">
               {/* Left side - Title */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
