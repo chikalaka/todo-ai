@@ -60,30 +60,87 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file type
-    const validMimeTypes = [
-      "audio/webm",
-      "audio/mp4",
-      "audio/mpeg",
-      "audio/wav",
-    ]
-    if (!validMimeTypes.includes(audioFile.type)) {
+    // Log file details for debugging
+    console.log("=== AUDIO FILE DEBUG INFO ===")
+    console.log("File name:", audioFile.name)
+    console.log("File type:", audioFile.type)
+    console.log("File size:", audioFile.size)
+    console.log("=============================")
+
+    // More flexible validation - check if it's any audio type
+    if (!audioFile.type.startsWith("audio/")) {
+      console.error("Invalid file type received:", audioFile.type)
       return NextResponse.json(
-        { success: false, error: "Invalid audio file format" },
+        {
+          success: false,
+          error: `Invalid file format. Expected audio file, got: ${audioFile.type}`,
+          debug_info: {
+            received_type: audioFile.type,
+            file_size: audioFile.size,
+            file_name: audioFile.name,
+          },
+        },
         { status: 400 },
       )
     }
 
     // Convert the audio file to a format OpenAI can process
     const audioBuffer = await audioFile.arrayBuffer()
-    const audioBlob = new Blob([audioBuffer], { type: audioFile.type })
+
+    // Create a more generic filename for OpenAI - Whisper can handle various formats
+    let filename = "recording"
+    if (audioFile.type.includes("webm")) {
+      filename = "recording.webm"
+    } else if (
+      audioFile.type.includes("mp4") ||
+      audioFile.type.includes("m4a")
+    ) {
+      filename = "recording.m4a"
+    } else if (audioFile.type.includes("wav")) {
+      filename = "recording.wav"
+    } else if (
+      audioFile.type.includes("mpeg") ||
+      audioFile.type.includes("mp3")
+    ) {
+      filename = "recording.mp3"
+    } else {
+      // Default to webm for unknown types, Whisper is quite flexible
+      filename = "recording.webm"
+    }
 
     // Step 1: Transcribe the audio using OpenAI Whisper
-    const transcription = await openaiClient.audio.transcriptions.create({
-      file: new File([audioBlob], "recording.webm", { type: audioFile.type }),
-      model: "whisper-1",
-      language: "en", // You can make this dynamic if needed
-    })
+    let transcription
+    try {
+      console.log("=== WHISPER PROCESSING ===")
+      console.log("Attempting transcription with filename:", filename)
+      console.log("Audio file type:", audioFile.type)
+      console.log("Audio buffer size:", audioBuffer.byteLength)
+
+      transcription = await openaiClient.audio.transcriptions.create({
+        file: new File([audioBuffer], filename, { type: audioFile.type }),
+        model: "whisper-1",
+        language: "en", // You can make this dynamic if needed
+      })
+
+      console.log("Whisper transcription successful")
+      console.log("==========================")
+    } catch (whisperError) {
+      console.error("=== WHISPER ERROR ===")
+      console.error("Error details:", whisperError)
+      console.error("File details:", {
+        filename,
+        type: audioFile.type,
+        size: audioBuffer.byteLength,
+      })
+      console.error("=====================")
+
+      // Re-throw with more context
+      throw new Error(
+        `Whisper transcription failed: ${
+          whisperError instanceof Error ? whisperError.message : "Unknown error"
+        }`,
+      )
+    }
 
     const transcribedText = transcription.text
 
