@@ -12,6 +12,7 @@ import {
   Menu,
   Mic,
   Tags,
+  Settings,
 } from "lucide-react"
 import {
   Sidebar,
@@ -50,6 +51,11 @@ const navigationItems = [
     title: "Manage Tags",
     url: "/tags",
     icon: Tags,
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: Settings,
   },
 ]
 

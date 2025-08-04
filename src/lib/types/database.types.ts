@@ -108,3 +108,14 @@ export type TagUpdate = Database["public"]["Tables"]["tags"]["Update"]
 export type TodoWithTags = Todo & {
   tags: Tag[]
 }
+
+// Settings types
+export interface SortSettings {
+  ageWeight: number // 0.0 to 1.0 - weight for age/creation time
+  priorityWeight: number // 0.0 to 1.0 - weight for priority
+}
+
+export const DEFAULT_SORT_SETTINGS: SortSettings = {
+  ageWeight: 0.5,
+  priorityWeight: 0.5,
+}

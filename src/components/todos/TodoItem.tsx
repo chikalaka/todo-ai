@@ -356,14 +356,14 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
               )}
 
               {/* Action Bar */}
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+              <div className="flex flex-wrap gap-1 pt-2 border-t border-gray-100">
                 {/* Edit Title Button */}
                 {!showArchived && (
                   <Button
                     onClick={() => setIsEditingTitle(true)}
                     variant="outline"
                     size="sm"
-                    className="h-9 px-3"
+                    className="h-7 px-2 text-xs"
                   >
                     Edit Title
                   </Button>
@@ -376,7 +376,7 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                     onValueChange={handlePriorityChange}
                   >
                     <SelectTrigger
-                      className={`h-8 w-auto min-w-[50px] text-sm ${getPriorityColor(
+                      className={`h-7 w-auto min-w-[45px] text-xs py-0 ${getPriorityColor(
                         todo.priority,
                       )} ${getPriorityBorderColor(todo.priority)}`}
                     >
@@ -403,7 +403,7 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                     onValueChange={handleStatusChange}
                   >
                     <SelectTrigger
-                      className={`h-9 w-auto min-w-[100px] text-sm ${getStatusColor(
+                      className={`h-7 w-auto min-w-[80px] text-xs py-1 ${getStatusColor(
                         todo.status,
                       )}`}
                     >
@@ -444,12 +444,12 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                     }
                   }}
                   disabled={showArchived ? isUnarchiving : isArchiving}
-                  className="h-9 px-3"
+                  className="h-7 px-2"
                 >
                   {showArchived ? (
-                    <ArchiveRestore className="h-4 w-4" />
+                    <ArchiveRestore className="h-3 w-3" />
                   ) : (
-                    <Archive className="h-4 w-4" />
+                    <Archive className="h-3 w-3" />
                   )}
                 </Button>
 
@@ -459,9 +459,9 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                   variant="destructive"
                   onClick={() => deleteTodo(todo.id)}
                   disabled={isDeleting}
-                  className="h-9 px-3"
+                  className="h-7 px-2"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
 

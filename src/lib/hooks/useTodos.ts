@@ -7,9 +7,11 @@ import {
   TodoInsert,
   TodoUpdate,
   TodoWithTags,
+  SortSettings,
 } from "@/lib/types/database.types"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { toast } from "sonner"
+import { getSortSettings } from "@/lib/settings"
 
 export function useTodos(showArchived = false) {
   const { user } = useAuth()
@@ -17,9 +19,12 @@ export function useTodos(showArchived = false) {
   const supabase = createClient()
 
   const todosQuery = useQuery({
-    queryKey: ["todos", showArchived],
+    queryKey: ["todos", showArchived, getSortSettings()],
     queryFn: async (): Promise<TodoWithTags[]> => {
       if (!user) return []
+
+      // Get sort settings for the custom sorting algorithm
+      const sortSettings = getSortSettings()
 
       // First get all todos for the user (archived or not based on parameter)
       const { data: todosData, error: todosError } = await supabase
@@ -27,7 +32,7 @@ export function useTodos(showArchived = false) {
         .select("*")
         .eq("user_id", user.id)
         .eq("archived", showArchived)
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: false }) // Fallback order
 
       if (todosError) throw todosError
 
@@ -59,7 +64,23 @@ export function useTodos(showArchived = false) {
             ?.filter(Boolean) || [],
       }))
 
-      return todosWithTags
+      // Sort todos using the custom algorithm
+      const sortedTodos = todosWithTags.sort((a, b) => {
+        const now = new Date().getTime()
+        const aAge = (now - new Date(a.created_at).getTime()) / (1000 * 60 * 60) // hours
+        const bAge = (now - new Date(b.created_at).getTime()) / (1000 * 60 * 60) // hours
+
+        const aScore =
+          aAge * sortSettings.ageWeight +
+          a.priority * sortSettings.priorityWeight
+        const bScore =
+          bAge * sortSettings.ageWeight +
+          b.priority * sortSettings.priorityWeight
+
+        return bScore - aScore // Higher score first
+      })
+
+      return sortedTodos
     },
     enabled: !!user,
   })
