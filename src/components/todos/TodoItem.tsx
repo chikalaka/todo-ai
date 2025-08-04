@@ -189,12 +189,6 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
     return "border-red-200"
   }
 
-  const getPriorityLabel = (priority: number) => {
-    if (priority <= 3) return "Low"
-    if (priority <= 7) return "Medium"
-    return "High"
-  }
-
   return (
     <div
       className={`border rounded-lg overflow-hidden transition-all ${
@@ -382,7 +376,7 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                     onValueChange={handlePriorityChange}
                   >
                     <SelectTrigger
-                      className={`h-9 w-auto min-w-[100px] text-sm ${getPriorityColor(
+                      className={`h-8 w-auto min-w-[50px] text-sm ${getPriorityColor(
                         todo.priority,
                       )} ${getPriorityBorderColor(todo.priority)}`}
                     >
@@ -395,7 +389,7 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                           value={priority.toString()}
                           className={getPriorityColor(priority)}
                         >
-                          P{priority} - {getPriorityLabel(priority)}
+                          P{priority}
                         </SelectItem>
                       ))}
                     </SelectContent>

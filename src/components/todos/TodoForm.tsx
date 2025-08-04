@@ -67,15 +67,25 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
     <div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <div className="relative">
-            <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Todo title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              className="pl-10"
-            />
+          <div className="relative flex gap-2">
+            <div className="relative flex-1">
+              <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Todo title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="pl-10"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={isCreating || !title.trim()}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Create
+            </Button>
           </div>
         </div>
 

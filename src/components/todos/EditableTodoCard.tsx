@@ -115,12 +115,6 @@ export function EditableTodoCard({
     return "bg-red-100 text-red-800 border-red-200"
   }
 
-  const getPriorityLabel = (priority: number) => {
-    if (priority <= 3) return "Low"
-    if (priority <= 7) return "Medium"
-    return "High"
-  }
-
   const getStatusDisplay = (status?: string) => {
     switch (status) {
       case "todo":
@@ -211,7 +205,7 @@ export function EditableTodoCard({
                       value={p.toString()}
                       className={getPriorityColor(p)}
                     >
-                      P{p} - {getPriorityLabel(p)}
+                      P{p}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -337,7 +331,7 @@ export function EditableTodoCard({
                 todo.priority,
               )}`}
             >
-              P{todo.priority} - {getPriorityLabel(todo.priority)}
+              P{todo.priority}
             </div>
 
             {/* Status Display */}
