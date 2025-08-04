@@ -107,59 +107,56 @@ export function TodoList({ showArchived = false }: TodoListProps) {
       {/* Modern Filters Bar */}
       <div className="space-y-4">
         {/* Main Filters Row */}
-        <div className="flex flex-col lg:flex-row gap-3 items-start lg:items-center">
+        <div className="flex gap-2 items-center">
           {/* Search */}
           <div className="flex-1 relative min-w-0">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search todos..."
+              placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-white/70 border-gray-200 focus:bg-white transition-colors"
             />
           </div>
 
-          {/* Filter Controls */}
-          <div className="flex flex-wrap gap-2 items-center">
-            {/* Status Filter */}
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32 bg-white/70 border-gray-200 focus:bg-white transition-colors">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="todo">Todo</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Status Filter */}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-auto bg-white/70 border-gray-200 focus:bg-white transition-colors">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="todo">Todo</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="done">Done</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Priority Filter */}
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-36 bg-white/70 border-gray-200 focus:bg-white transition-colors">
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="high">High (8-10)</SelectItem>
-                <SelectItem value="medium">Medium (4-7)</SelectItem>
-                <SelectItem value="low">Low (1-3)</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Priority Filter */}
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-auto bg-white/70 border-gray-200 focus:bg-white transition-colors">
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Priority</SelectItem>
+              <SelectItem value="high">High (8-10)</SelectItem>
+              <SelectItem value="medium">Medium (4-7)</SelectItem>
+              <SelectItem value="low">Low (1-3)</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Clear All Filters */}
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAllFilters}
-                className="flex items-center gap-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              >
-                <X className="h-3 w-3" />
-                Clear
-              </Button>
-            )}
-          </div>
+          {/* Clear All Filters */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="flex items-center gap-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 px-2 shrink-0"
+            >
+              <X className="h-3 w-3" />
+              <span className="hidden sm:inline">Clear</span>
+            </Button>
+          )}
         </div>
 
         {/* Tag Filters Section */}

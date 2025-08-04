@@ -210,7 +210,6 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
             className="px-4 py-4 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200"
           >
             <div className="flex items-center justify-between w-full">
-              {/* Left side - Title */}
               <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
                 <h3
                   className={`font-medium text-left truncate text-base ${
@@ -224,17 +223,6 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                     Archived
                   </Badge>
                 )}
-              </div>
-
-              {/* Right side - Priority Badge */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <div
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(
-                    todo.priority,
-                  )}`}
-                >
-                  P{todo.priority}
-                </div>
               </div>
             </div>
           </AccordionTrigger>
