@@ -178,9 +178,15 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
   }
 
   const getPriorityColor = (priority: number) => {
-    if (priority <= 3) return "bg-green-100 text-green-800 border-green-200"
-    if (priority <= 7) return "bg-yellow-100 text-yellow-800 border-yellow-200"
-    return "bg-red-100 text-red-800 border-red-200"
+    if (priority <= 3) return "bg-green-100 text-green-800"
+    if (priority <= 7) return "bg-yellow-100 text-yellow-800"
+    return "bg-red-100 text-red-800"
+  }
+
+  const getPriorityBorderColor = (priority: number) => {
+    if (priority <= 3) return "border-green-200"
+    if (priority <= 7) return "border-yellow-200"
+    return "border-red-200"
   }
 
   const getPriorityLabel = (priority: number) => {
@@ -201,67 +207,18 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
         <AccordionItem value={todo.id} className="border-none">
           <AccordionTrigger
             asChild
-            className="px-4 py-3 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200"
+            className="px-4 py-4 hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-gray-200"
           >
             <div className="flex items-center justify-between w-full">
               {/* Left side - Title */}
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                {/* Title */}
-                {isEditingTitle ? (
-                  <div
-                    className="flex items-center gap-2 flex-1 min-w-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Input
-                      value={editedTitle}
-                      onChange={(e) => setEditedTitle(e.target.value)}
-                      className="text-sm flex-1"
-                      autoFocus
-                    />
-                    <Button
-                      onClick={handleTitleSave}
-                      size="sm"
-                      className="h-7 w-7 p-0 flex-shrink-0"
-                    >
-                      <Check className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      onClick={handleTitleCancel}
-                      variant="outline"
-                      size="sm"
-                      className="h-7 w-7 p-0 flex-shrink-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <h3
-                      className={`font-medium text-left truncate ${
-                        todo.status === "done"
-                          ? "line-through text-gray-500"
-                          : ""
-                      } ${showArchived ? "text-gray-600" : "text-gray-900"}`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {todo.title}
-                    </h3>
-                    {!showArchived && (
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setIsEditingTitle(true)
-                        }}
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 opacity-50 hover:opacity-100 flex-shrink-0"
-                      >
-                        <Edit2 className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                )}
-
+              <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
+                <h3
+                  className={`font-medium text-left truncate text-base ${
+                    todo.status === "done" ? "line-through text-gray-500" : ""
+                  } ${showArchived ? "text-gray-600" : "text-gray-900"}`}
+                >
+                  {todo.title}
+                </h3>
                 {showArchived && (
                   <Badge variant="secondary" className="text-xs flex-shrink-0">
                     Archived
@@ -269,19 +226,177 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                 )}
               </div>
 
-              {/* Right side - Priority, Status Dropdowns, and Actions */}
+              {/* Right side - Priority Badge */}
               <div className="flex items-center gap-2 flex-shrink-0">
+                <div
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${getPriorityColor(
+                    todo.priority,
+                  )}`}
+                >
+                  P{todo.priority}
+                </div>
+              </div>
+            </div>
+          </AccordionTrigger>
+
+          <AccordionContent className="px-4 pb-4">
+            <div className="space-y-6 pt-4">
+              {/* Description Section */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  {!showArchived && !isEditingDescription && (
+                    <Button
+                      onClick={() => setIsEditingDescription(true)}
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+
+                {isEditingDescription ? (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      placeholder="Add description..."
+                      className="text-sm min-h-[80px]"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleDescriptionSave}
+                        size="sm"
+                        className="h-8 px-3"
+                      >
+                        <Check className="h-3 w-3 mr-1" />
+                        Save
+                      </Button>
+                      <Button
+                        onClick={handleDescriptionCancel}
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p
+                    className={`text-sm ${
+                      todo.description
+                        ? "text-gray-600"
+                        : "text-gray-400 italic"
+                    } ${todo.status === "done" ? "line-through" : ""}`}
+                  >
+                    {todo.description || "No description"}
+                  </p>
+                )}
+              </div>
+
+              {/* Created Date */}
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="h-4 w-4" />
+                <span>Created: {formatDate(todo.created_at)}</span>
+              </div>
+
+              {/* Due Date (if exists) */}
+              {todo.due_date && (
+                <div
+                  className={`flex items-center gap-2 text-sm ${
+                    isPastDue ? "text-red-600 font-medium" : "text-gray-600"
+                  }`}
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span>Due: {formatDate(todo.due_date)}</span>
+                  {isPastDue && <span className="text-xs">(Overdue)</span>}
+                </div>
+              )}
+
+              {/* Manage Tags Section */}
+              {!showArchived && (
+                <div className="space-y-3">
+                  {todo.tags && todo.tags.length > 0 && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        Tags
+                      </label>
+                      <div className="flex flex-wrap gap-1">
+                        {todo.tags.map((tag) => (
+                          <Badge
+                            key={tag.id}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {tag.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    {showTagInput && (
+                      <TagInput
+                        selectedTags={todo.tags || []}
+                        onTagsChange={() => {}}
+                        todoId={todo.id}
+                      />
+                    )}
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowTagInput(!showTagInput)}
+                      className="text-sm h-8 px-3 flex items-center gap-2"
+                    >
+                      <Tags className="h-4 w-4" />
+                      {showTagInput ? (
+                        <>
+                          Hide Tag Editor <ChevronUp className="h-3 w-3" />
+                        </>
+                      ) : (
+                        <>
+                          Manage Tags <ChevronDown className="h-3 w-3" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Bar */}
+              <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+                {/* Edit Title Button */}
+                {!showArchived && (
+                  <Button
+                    onClick={() => setIsEditingTitle(true)}
+                    variant="outline"
+                    size="sm"
+                    className="h-9 px-3"
+                  >
+                    Edit Title
+                  </Button>
+                )}
+
                 {/* Priority Dropdown */}
                 {!showArchived && (
                   <Select
                     value={todo.priority.toString()}
                     onValueChange={handlePriorityChange}
-                    disabled={showArchived}
                   >
                     <SelectTrigger
-                      className={`h-8 w-24 text-xs ${getPriorityColor(
+                      className={`h-9 w-auto min-w-[100px] text-sm ${getPriorityColor(
                         todo.priority,
-                      )}`}
+                      )} ${getPriorityBorderColor(todo.priority)}`}
                     >
                       <SelectValue />
                     </SelectTrigger>
@@ -304,10 +419,9 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                   <Select
                     value={todo.status}
                     onValueChange={handleStatusChange}
-                    disabled={showArchived}
                   >
                     <SelectTrigger
-                      className={`h-8 w-28 text-xs ${getStatusColor(
+                      className={`h-9 w-auto min-w-[100px] text-sm ${getStatusColor(
                         todo.status,
                       )}`}
                     >
@@ -336,372 +450,74 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                   </Select>
                 )}
 
-                {/* Show badges for archived items */}
-                {showArchived && (
-                  <>
-                    <Badge
-                      className={`${getPriorityColor(todo.priority)} text-xs`}
-                    >
-                      P{todo.priority} - {getPriorityLabel(todo.priority)}
-                    </Badge>
-                    <Badge className={`${getStatusColor(todo.status)} text-xs`}>
-                      {getStatusDisplay(todo.status)}
-                    </Badge>
-                  </>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-1">
+                {/* Archive/Unarchive Button */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (showArchived) {
+                      unarchiveTodo(todo.id)
+                    } else {
+                      archiveTodo(todo.id)
+                    }
+                  }}
+                  disabled={showArchived ? isUnarchiving : isArchiving}
+                  className="h-9 px-3"
+                >
                   {showArchived ? (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          unarchiveTodo(todo.id)
-                        }}
-                        disabled={isUnarchiving}
-                        className="h-8 px-2"
-                      >
-                        <ArchiveRestore className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          deleteTodo(todo.id)
-                        }}
-                        disabled={isDeleting}
-                        className="h-8 px-2"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </>
+                    <ArchiveRestore className="h-4 w-4" />
                   ) : (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          archiveTodo(todo.id)
-                        }}
-                        disabled={isArchiving}
-                        className="h-8 px-2"
-                      >
-                        <Archive className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          deleteTodo(todo.id)
-                        }}
-                        disabled={isDeleting}
-                        className="h-8 px-2"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </>
+                    <Archive className="h-4 w-4" />
                   )}
-                </div>
+                </Button>
+
+                {/* Delete Button */}
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteTodo(todo.id)}
+                  disabled={isDeleting}
+                  className="h-9 px-3"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               </div>
-            </div>
-          </AccordionTrigger>
 
-          <AccordionContent className="px-4 pb-4">
-            <div className="space-y-4 pt-2">
-              {/* Edit Mode */}
-              {isEditing && !showArchived ? (
-                <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-gray-900">Edit Todo</h4>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        onClick={handleSaveEdit}
-                        className="h-7 px-3"
-                      >
-                        <Check className="h-3 w-3 mr-1" />
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleCancelEdit}
-                        className="h-7 px-3"
-                      >
-                        <X className="h-3 w-3 mr-1" />
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Edit Title */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      Title
-                    </label>
-                    <Input
-                      value={editData.title}
-                      onChange={(e) =>
-                        setEditData({ ...editData, title: e.target.value })
-                      }
-                      className="text-sm"
-                    />
-                  </div>
-
-                  {/* Edit Description */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      Description
-                    </label>
-                    <Textarea
-                      value={editData.description}
-                      onChange={(e) =>
-                        setEditData({
-                          ...editData,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="Add a description..."
-                      className="text-sm min-h-20"
-                    />
-                  </div>
-
-                  {/* Edit Priority */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      Priority
-                    </label>
-                    <Select
-                      value={editData.priority.toString()}
-                      onValueChange={(value) =>
-                        setEditData({ ...editData, priority: parseInt(value) })
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((priority) => (
-                          <SelectItem
-                            key={priority}
-                            value={priority.toString()}
-                          >
-                            P{priority} -{" "}
-                            {priority <= 3
-                              ? "Low"
-                              : priority <= 7
-                              ? "Medium"
-                              : "High"}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Edit Due Date */}
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">
-                      Due Date
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="date"
-                        value={formatDateForInput(editData.due_date)}
-                        onChange={(e) =>
-                          setEditData({ ...editData, due_date: e.target.value })
-                        }
-                        className="text-sm flex-1"
-                      />
-                      {editData.due_date && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={handleClearDueDate}
-                          className="h-9 px-3"
-                        >
-                          <CalendarX className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+              {/* Archived info for archived items */}
+              {showArchived && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 pt-2 border-t border-gray-100">
+                  <Archive className="h-4 w-4" />
+                  <span>Archived: {formatDate(todo.updated_at)}</span>
                 </div>
-              ) : (
-                <>
-                  {/* Description */}
-                  {(todo.description || isEditingDescription) && (
-                    <div className="space-y-1">
-                      <label className="text-sm font-medium text-gray-700">
-                        Description
-                      </label>
-                      {isEditingDescription ? (
-                        <div className="space-y-2">
-                          <Textarea
-                            value={editedDescription}
-                            onChange={(e) =>
-                              setEditedDescription(e.target.value)
-                            }
-                            placeholder="Add description..."
-                            className="text-sm min-h-[80px]"
-                            autoFocus
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={handleDescriptionSave}
-                              size="sm"
-                              className="h-7 px-3"
-                            >
-                              <Check className="h-3 w-3 mr-1" />
-                              Save
-                            </Button>
-                            <Button
-                              onClick={handleDescriptionCancel}
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-3"
-                            >
-                              <X className="h-3 w-3 mr-1" />
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2">
-                          <TodoDescription
-                            description={todo.description || "No description"}
-                            className={`text-sm text-gray-600 flex-1 ${
-                              todo.status === "done" ? "line-through" : ""
-                            }`}
-                          />
-                          {!showArchived && (
-                            <Button
-                              onClick={() => setIsEditingDescription(true)}
-                              variant="ghost"
-                              size="sm"
-                              className="h-6 w-6 p-0 opacity-50 hover:opacity-100 flex-shrink-0"
-                            >
-                              <Pencil className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {!todo.description &&
-                    !isEditingDescription &&
-                    !showArchived && (
-                      <div className="space-y-1">
-                        <label className="text-sm font-medium text-gray-700">
-                          Description
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-400 italic">
-                            No description
-                          </span>
-                          <Button
-                            onClick={() => setIsEditingDescription(true)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="h-4 w-4" />
-                      <span>Created: {formatDate(todo.created_at)}</span>
-                    </div>
-
-                    {todo.due_date && (
-                      <div
-                        className={`flex items-center gap-2 text-sm ${
-                          isPastDue
-                            ? "text-red-600 font-medium"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        <Calendar className="h-4 w-4" />
-                        <span>Due: {formatDate(todo.due_date)}</span>
-                        {isPastDue && (
-                          <span className="text-xs">(Overdue)</span>
-                        )}
-                      </div>
-                    )}
-
-                    {showArchived && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Archive className="h-4 w-4" />
-                        <span>Archived: {formatDate(todo.updated_at)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Tags Section */}
-                  <div className="space-y-3">
-                    {todo.tags && todo.tags.length > 0 && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">
-                          Tags
-                        </label>
-                        <div className="flex flex-wrap gap-1">
-                          {todo.tags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="outline"
-                              className="text-xs"
-                            >
-                              {tag.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {!showArchived && (
-                      <div className="space-y-2">
-                        {showTagInput && (
-                          <TagInput
-                            selectedTags={todo.tags || []}
-                            onTagsChange={() => {}}
-                            todoId={todo.id}
-                          />
-                        )}
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setShowTagInput(!showTagInput)}
-                          className="text-xs h-7 px-3 flex items-center gap-1"
-                        >
-                          <Tags className="h-3 w-3" />
-                          {showTagInput ? (
-                            <>
-                              Hide Tag Editor <ChevronUp className="h-3 w-3" />
-                            </>
-                          ) : (
-                            <>
-                              Manage Tags <ChevronDown className="h-3 w-3" />
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </>
               )}
             </div>
+
+            {/* Title Edit Modal */}
+            {isEditingTitle && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                  <h3 className="text-lg font-medium mb-4">Edit Title</h3>
+                  <Input
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value)}
+                    className="mb-4"
+                    autoFocus
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      onClick={handleTitleCancel}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleTitleSave} size="sm">
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
