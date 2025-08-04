@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,7 @@ interface RecordTodoDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onTodosCreated?: () => void
+  initialAudioBlob?: Blob | null
 }
 
 interface ProcessedTodo {
@@ -48,12 +49,20 @@ export function RecordTodoDialog({
   open,
   onOpenChange,
   onTodosCreated,
+  initialAudioBlob,
 }: RecordTodoDialogProps) {
   const [processingState, setProcessingState] =
     useState<ProcessingState>("idle")
   const [processedTodos, setProcessedTodos] = useState<ProcessedTodo[]>([])
   const [error, setError] = useState<string | null>(null)
   const { createBulkTodos } = useTodos()
+
+  // Auto-process initial audio blob when provided
+  useEffect(() => {
+    if (initialAudioBlob && open && processingState === "idle") {
+      handleRecordingComplete(initialAudioBlob)
+    }
+  }, [initialAudioBlob, open, processingState])
 
   const handleRecordingComplete = async (audioBlob: Blob) => {
     setProcessingState("uploading")
