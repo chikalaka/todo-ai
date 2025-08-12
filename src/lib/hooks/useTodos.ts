@@ -11,20 +11,20 @@ import {
 } from "@/lib/types/database.types"
 import { useAuth } from "@/components/auth/AuthProvider"
 import { toast } from "sonner"
-import { getSortSettings } from "@/lib/settings"
+import { useSettings } from "./useSettings"
 
 export function useTodos(showArchived = false) {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const supabase = createClient()
+  const { settings: sortSettings } = useSettings()
 
   const todosQuery = useQuery({
-    queryKey: ["todos", showArchived, getSortSettings()],
+    queryKey: ["todos", showArchived, sortSettings],
     queryFn: async (): Promise<TodoWithTags[]> => {
       if (!user) return []
 
-      // Get sort settings for the custom sorting algorithm
-      const sortSettings = getSortSettings()
+      // Use sort settings from the hook
 
       // First get all todos for the user (archived or not based on parameter)
       const { data: todosData, error: todosError } = await supabase
@@ -64,18 +64,33 @@ export function useTodos(showArchived = false) {
             ?.filter(Boolean) || [],
       }))
 
-      // Sort todos using the custom algorithm
+      // Sort todos using the improved priority-dominant algorithm
       const sortedTodos = todosWithTags.sort((a, b) => {
         const now = new Date().getTime()
         const aAge = (now - new Date(a.created_at).getTime()) / (1000 * 60 * 60) // hours
         const bAge = (now - new Date(b.created_at).getTime()) / (1000 * 60 * 60) // hours
 
-        const aScore =
-          aAge * sortSettings.ageWeight +
-          a.priority * sortSettings.priorityWeight
-        const bScore =
-          bAge * sortSettings.ageWeight +
-          b.priority * sortSettings.priorityWeight
+        // Improved algorithm: Priority-dominant with smart age scaling
+        const calculateScore = (priority: number, ageHours: number) => {
+          // Priority gets exponential weighting - higher priorities dominate
+          const priorityScore =
+            priority * priority * (sortSettings.priorityWeight * 10 + 1)
+
+          // Age gets logarithmic scaling to prevent overwhelming priority
+          // Normalized to reasonable scale (0-10 range for very old items)
+          const normalizedAge =
+            (Math.log(ageHours + 1) / Math.log(24 * 30 + 1)) * 10 // 30 days = ~10 points
+
+          // Age influence is modulated by both weights for more intuitive behavior
+          const ageScore =
+            normalizedAge *
+            (sortSettings.ageWeight * (sortSettings.priorityWeight + 0.1))
+
+          return priorityScore + ageScore
+        }
+
+        const aScore = calculateScore(a.priority, aAge)
+        const bScore = calculateScore(b.priority, bAge)
 
         return bScore - aScore // Higher score first
       })

@@ -81,6 +81,32 @@ export type Database = {
           todo_id?: string
         }
       }
+      user_settings: {
+        Row: {
+          id: string
+          user_id: string
+          age_weight: number
+          priority_weight: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          age_weight?: number
+          priority_weight?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          age_weight?: number
+          priority_weight?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -105,6 +131,12 @@ export type Tag = Database["public"]["Tables"]["tags"]["Row"]
 export type TagInsert = Database["public"]["Tables"]["tags"]["Insert"]
 export type TagUpdate = Database["public"]["Tables"]["tags"]["Update"]
 
+export type UserSettings = Database["public"]["Tables"]["user_settings"]["Row"]
+export type UserSettingsInsert =
+  Database["public"]["Tables"]["user_settings"]["Insert"]
+export type UserSettingsUpdate =
+  Database["public"]["Tables"]["user_settings"]["Update"]
+
 export type TodoWithTags = Todo & {
   tags: Tag[]
 }
@@ -116,6 +148,6 @@ export interface SortSettings {
 }
 
 export const DEFAULT_SORT_SETTINGS: SortSettings = {
-  ageWeight: 0.5,
-  priorityWeight: 0.5,
+  ageWeight: 0.3, // Moderate age influence within priority groups
+  priorityWeight: 0.7, // Strong priority emphasis for intuitive behavior
 }

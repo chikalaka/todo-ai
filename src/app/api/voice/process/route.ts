@@ -183,6 +183,9 @@ EXAMPLES:
 
 Current date for reference: ${new Date().toISOString().split("T")[0]}
 
+כל הפרומפט אמנם כתוב באנגלית, אבל הדובר מדבר בעברית.
+אין בעיה לכתוב את המשימות בעברית או באנגלית, העיקר שהתוצאות יהיו מדויקות ביותר.
+
 TRANSCRIPTION TO ANALYZE:
 "${transcribedText}"
 

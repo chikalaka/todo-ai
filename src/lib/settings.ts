@@ -2,9 +2,58 @@ import { SortSettings, DEFAULT_SORT_SETTINGS } from "./types/database.types"
 
 const SETTINGS_STORAGE_KEY = "todo-app-settings"
 
-export function getSortSettings(): SortSettings {
-  if (typeof window === "undefined") {
+// Database API functions
+export async function fetchSettingsFromDB(): Promise<SortSettings> {
+  try {
+    const response = await fetch("/api/settings")
+    if (!response.ok) {
+      throw new Error("Failed to fetch settings")
+    }
+    return await response.json()
+  } catch (error) {
+    console.warn("Error fetching settings from database:", error)
     return DEFAULT_SORT_SETTINGS
+  }
+}
+
+export async function saveSettingsToDB(settings: SortSettings): Promise<void> {
+  try {
+    const response = await fetch("/api/settings", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings),
+    })
+
+    if (!response.ok) {
+      throw new Error("Failed to save settings")
+    }
+  } catch (error) {
+    console.warn("Error saving settings to database:", error)
+    throw error
+  }
+}
+
+export async function resetSettingsInDB(): Promise<void> {
+  try {
+    const response = await fetch("/api/settings", {
+      method: "DELETE",
+    })
+
+    if (!response.ok) {
+      throw new Error("Failed to reset settings")
+    }
+  } catch (error) {
+    console.warn("Error resetting settings in database:", error)
+    throw error
+  }
+}
+
+// Legacy localStorage functions (for migration and fallback)
+export function getSortSettingsFromLocalStorage(): SortSettings | null {
+  if (typeof window === "undefined") {
+    return null
   }
 
   try {
@@ -27,9 +76,33 @@ export function getSortSettings(): SortSettings {
     console.warn("Error reading settings from localStorage:", error)
   }
 
-  return DEFAULT_SORT_SETTINGS
+  return null
 }
 
+export function clearLocalStorageSettings(): void {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  try {
+    localStorage.removeItem(SETTINGS_STORAGE_KEY)
+  } catch (error) {
+    console.warn("Error removing settings from localStorage:", error)
+  }
+}
+
+// Fallback function for SSR and backward compatibility
+export function getSortSettings(): SortSettings {
+  if (typeof window === "undefined") {
+    return DEFAULT_SORT_SETTINGS
+  }
+
+  // Try localStorage first for immediate return
+  const localSettings = getSortSettingsFromLocalStorage()
+  return localSettings || DEFAULT_SORT_SETTINGS
+}
+
+// Legacy functions for backward compatibility (deprecated)
 export function setSortSettings(settings: SortSettings): void {
   if (typeof window === "undefined") {
     return

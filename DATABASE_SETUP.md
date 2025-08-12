@@ -44,10 +44,22 @@ CREATE TABLE tag_todo (
   PRIMARY KEY (tag_id, todo_id)
 );
 
+-- Create user_settings table
+CREATE TABLE user_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  age_weight DECIMAL(3,2) NOT NULL CHECK (age_weight >= 0 AND age_weight <= 1) DEFAULT 0.5,
+  priority_weight DECIMAL(3,2) NOT NULL CHECK (priority_weight >= 0 AND priority_weight <= 1) DEFAULT 0.5,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
 -- Enable RLS on our custom tables
 ALTER TABLE todos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tag_todo ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 
 -- Row Level Security Policies
 CREATE POLICY "Users can only see their own todos" ON todos
@@ -63,11 +75,15 @@ CREATE POLICY "Users can only manage their own tag associations" ON tag_todo
     )
   );
 
+CREATE POLICY "Users can only see their own settings" ON user_settings
+  FOR ALL USING (auth.uid() = user_id);
+
 -- Indexes for performance
 CREATE INDEX idx_todos_user_id ON todos(user_id);
 CREATE INDEX idx_todos_status ON todos(status);
 CREATE INDEX idx_todos_due_date ON todos(due_date);
 CREATE INDEX idx_tags_user_id ON tags(user_id);
+CREATE INDEX idx_user_settings_user_id ON user_settings(user_id);
 ```
 
 ## 3. Configure Google OAuth
