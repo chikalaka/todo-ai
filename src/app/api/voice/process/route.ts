@@ -182,6 +182,7 @@ EXAMPLES:
   → Todo 1: transcription_segment: "Create a LinkedIn post about the new product launch and make sure to include the key features and benefits"
 
 Current date for reference: ${new Date().toISOString().split("T")[0]}
+Add emoji for each todo.
 
 כל הפרומפט אמנם כתוב באנגלית, אבל הדובר מדבר בעברית.
 אין בעיה לכתוב את המשימות בעברית או באנגלית, העיקר שהתוצאות יהיו מדויקות ביותר.
