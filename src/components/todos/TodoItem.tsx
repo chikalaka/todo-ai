@@ -69,7 +69,9 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
     todo.description || "",
   )
 
-  const handleStatusChange = (newStatus: "todo" | "in_progress" | "done") => {
+  const handleStatusChange = (
+    newStatus: "todo" | "in_progress" | "done" | "blocked",
+  ) => {
     updateTodo({
       id: todo.id,
       updates: { status: newStatus },
@@ -159,6 +161,8 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
         return "bg-blue-100 text-blue-800 border-blue-200"
       case "done":
         return "bg-green-100 text-green-800 border-green-200"
+      case "blocked":
+        return "bg-red-100 text-red-800 border-red-200"
       default:
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
@@ -172,6 +176,8 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
         return "In Progress"
       case "done":
         return "Done"
+      case "blocked":
+        return "Blocked"
       default:
         return "Todo"
     }
@@ -194,7 +200,9 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
       className={`border rounded-lg overflow-hidden transition-all ${
         showArchived ? "bg-gray-50 border-gray-200" : "bg-white border-gray-200"
       } ${todo.status === "done" ? "opacity-75" : ""} ${
-        isPastDue ? "border-red-300 bg-red-50/30" : ""
+        isPastDue || todo.status === "blocked"
+          ? "border-red-300 bg-red-50/30"
+          : ""
       } hover:shadow-sm hover:border-gray-300`}
     >
       <Accordion type="single" collapsible className="w-full">
@@ -421,6 +429,12 @@ export function TodoItem({ todo, showArchived = false }: TodoItemProps) {
                         className={getStatusColor("in_progress")}
                       >
                         In Progress
+                      </SelectItem>
+                      <SelectItem
+                        value="blocked"
+                        className={getStatusColor("blocked")}
+                      >
+                        Blocked
                       </SelectItem>
                       <SelectItem
                         value="done"

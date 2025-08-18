@@ -18,7 +18,7 @@ export type Database = {
           created_at: string
           updated_at: string
           due_date: string | null
-          status: "todo" | "in_progress" | "done"
+          status: "todo" | "in_progress" | "done" | "blocked"
           priority: number
           archived: boolean
         }
@@ -30,7 +30,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           due_date?: string | null
-          status?: "todo" | "in_progress" | "done"
+          status?: "todo" | "in_progress" | "done" | "blocked"
           priority?: number
           archived?: boolean
         }
@@ -42,7 +42,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           due_date?: string | null
-          status?: "todo" | "in_progress" | "done"
+          status?: "todo" | "in_progress" | "done" | "blocked"
           priority?: number
           archived?: boolean
         }

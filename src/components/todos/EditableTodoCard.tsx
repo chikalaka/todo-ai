@@ -18,7 +18,7 @@ interface ProcessedTodo {
   title: string
   description?: string
   priority: number
-  status?: "todo" | "in_progress" | "done"
+  status?: "todo" | "in_progress" | "done" | "blocked"
   due_date?: string
   tags?: string[]
   transcription_segment: string
@@ -104,6 +104,8 @@ export function EditableTodoCard({
         return "bg-blue-100 text-blue-800 border-blue-200"
       case "done":
         return "bg-green-100 text-green-800 border-green-200"
+      case "blocked":
+        return "bg-red-100 text-red-800 border-red-200"
       default:
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
@@ -123,6 +125,8 @@ export function EditableTodoCard({
         return "In Progress"
       case "done":
         return "Done"
+      case "blocked":
+        return "Blocked"
       default:
         return "Todo"
     }
@@ -241,6 +245,12 @@ export function EditableTodoCard({
                   </SelectItem>
                   <SelectItem value="done" className={getStatusColor("done")}>
                     Done
+                  </SelectItem>
+                  <SelectItem
+                    value="blocked"
+                    className={getStatusColor("blocked")}
+                  >
+                    Blocked
                   </SelectItem>
                 </SelectContent>
               </Select>

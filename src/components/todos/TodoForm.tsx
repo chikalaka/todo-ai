@@ -27,7 +27,9 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
   const [description, setDescription] = useState("")
   const [priority, setPriority] = useState("5")
   const [dueDate, setDueDate] = useState("")
-  const [status, setStatus] = useState<"todo" | "in_progress" | "done">("todo")
+  const [status, setStatus] = useState<
+    "todo" | "in_progress" | "done" | "blocked"
+  >("todo")
   const [selectedTags, setSelectedTags] = useState<Tag[]>([])
 
   const { createTodo, isCreating } = useTodos()
@@ -120,9 +122,9 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
           <div>
             <Select
               value={status}
-              onValueChange={(value: "todo" | "in_progress" | "done") =>
-                setStatus(value)
-              }
+              onValueChange={(
+                value: "todo" | "in_progress" | "done" | "blocked",
+              ) => setStatus(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
@@ -131,6 +133,7 @@ export function TodoForm({ onSuccess }: TodoFormProps) {
                 <SelectItem value="todo">Todo</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="done">Done</SelectItem>
+                <SelectItem value="blocked">Blocked</SelectItem>
               </SelectContent>
             </Select>
           </div>

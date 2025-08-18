@@ -23,7 +23,7 @@ CREATE TABLE todos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   due_date TIMESTAMPTZ,
-  status TEXT NOT NULL CHECK (status IN ('todo', 'in_progress', 'done')) DEFAULT 'todo',
+  status TEXT NOT NULL CHECK (status IN ('todo', 'in_progress', 'done', 'blocked')) DEFAULT 'todo',
   priority INTEGER NOT NULL CHECK (priority BETWEEN 1 AND 10) DEFAULT 5,
   archived BOOLEAN NOT NULL DEFAULT FALSE
 );

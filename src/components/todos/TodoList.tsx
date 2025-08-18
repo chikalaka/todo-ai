@@ -151,42 +151,40 @@ export function TodoList({ showArchived = false }: TodoListProps) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 mb-12">
         {/* Mobile-only Action Buttons */}
-        {isMobile && (
-          <div className="flex justify-around py-4">
-            <div className="flex flex-col items-center space-y-2">
-              <Button
-                onClick={handleRecordButtonClick}
-                size="lg"
-                className={`h-16 w-16 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 ${
-                  recordingState === "recording"
-                    ? "bg-red-600 animate-pulse"
-                    : "bg-red-500 hover:bg-red-600"
-                }`}
-              >
-                {recordingState === "idle" ? (
-                  <Mic className="h-6 w-6" />
-                ) : (
-                  <Square className="h-6 w-6" />
-                )}
-              </Button>
-              {recordingState === "recording" && (
-                <span className="text-xs text-red-600 font-mono">
-                  {formatDuration(duration)}
-                </span>
-              )}
-            </div>
+        <div className="flex justify-around py-4">
+          <div className="flex flex-col items-center space-y-2">
             <Button
-              onClick={() => setCreateDialogOpen(true)}
+              onClick={handleRecordButtonClick}
               size="lg"
-              variant="outline"
-              className="h-16 w-16 rounded-full border-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+              className={`h-16 w-16 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 ${
+                recordingState === "recording"
+                  ? "bg-red-600 animate-pulse"
+                  : "bg-red-500 hover:bg-red-600"
+              }`}
             >
-              <Plus className="h-6 w-6" />
+              {recordingState === "idle" ? (
+                <Mic className="h-6 w-6" />
+              ) : (
+                <Square className="h-6 w-6" />
+              )}
             </Button>
+            {recordingState === "recording" && (
+              <span className="text-xs text-red-600 font-mono">
+                {formatDuration(duration)}
+              </span>
+            )}
           </div>
-        )}
+          <Button
+            onClick={() => setCreateDialogOpen(true)}
+            size="lg"
+            variant="outline"
+            className="h-16 w-16 rounded-full border-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </div>
 
         {/* Modern Filters Bar */}
         <div className="space-y-4">
@@ -213,6 +211,7 @@ export function TodoList({ showArchived = false }: TodoListProps) {
                 <SelectItem value="todo">Todo</SelectItem>
                 <SelectItem value="in_progress">In Progress</SelectItem>
                 <SelectItem value="done">Done</SelectItem>
+                <SelectItem value="blocked">Blocked</SelectItem>
               </SelectContent>
             </Select>
 
